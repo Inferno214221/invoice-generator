@@ -5,7 +5,10 @@ edition = "2024"
 
 [dependencies]
 chrono = "0.4.42"
+clap = { version = "4.5.53", features = ["derive"] }
+clap-cargo = "0.18.3"
 comemo = "0.4"
+ctreg = "1.0.3"
 derive_more = { version = "2.0.0", features = ["debug", "display"] }
 diesel = { version = "2.2.0", features = [
     "sqlite",
