@@ -1,6 +1,6 @@
 use std::{path::PathBuf, str::FromStr};
 
-use chrono::{Local, NaiveDate, NaiveDateTime, NaiveTime, TimeDelta};
+use chrono::{NaiveDate, NaiveTime, TimeDelta};
 use clap::{Parser, Subcommand, builder::styling::Styles};
 use ctreg::regex;
 

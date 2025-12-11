@@ -1,11 +1,17 @@
 use std::{fs, path::PathBuf};
 
 use chrono::{Datelike, Local};
-use diesel::{prelude::*};
+use csv::{QuoteStyle, WriterBuilder};
+use diesel::prelude::*;
 use typst::{Library, LibraryExt};
 use typst_pdf::PdfOptions;
 
-use crate::{cli::args::{DocIdentifier, DocType}, orm::{model::{Invoice, Recipient}, query::InvoiceWithActivities}, typst::{convert::IntoTypst, world::MinimalWorld}};
+use crate::cli::args::{DocIdentifier, DocType};
+use crate::csv::convert::CsvTime;
+use crate::orm::model::Time;
+use crate::orm::query::TimeWithTickets;
+use crate::orm::{model::{Invoice, Recipient}, query::InvoiceWithActivities};
+use crate::typst::{convert::IntoTypst, world::MinimalWorld};
 
 pub fn generate(
     conn: &mut SqliteConnection,
@@ -86,5 +92,54 @@ pub fn generate_timesheet(
     ident: DocIdentifier,
     output: Option<PathBuf>
 ) {
-    //
+    use crate::orm::schema::{invoice, invoice_activity};
+
+    let invoices = match ident {
+        DocIdentifier::Num(n) => Invoice::query()
+            .filter(invoice::inv_num.eq(n))
+            .load(conn),
+        DocIdentifier::Month(m) => Invoice::query()
+            .filter(invoice::inv_month.eq(m))
+            .load(conn),
+    }.expect("Error retrieving timesheet from database");
+
+    let Ok([invoice]) = <[Invoice; 1]>::try_from(invoices) else {
+        panic!("Identifier failed to uniquely identify an timesheet");
+    };
+
+    let times = TimeWithTickets::from_query(
+        Time::query()
+            .inner_join(invoice_activity::table)
+            .filter(invoice_activity::inv_num.eq(invoice.inv_num)),
+        conn
+    ).expect("Error retrieving timesheet from database");
+
+    let output = output.unwrap_or_else(
+        || format!(
+            "./{}-{}-timesheet-{}.csv",
+            invoice.inv_month.year(),
+            invoice.inv_month.month(),
+            invoice.inv_num
+        ).into()
+    );
+
+    let mut writer = WriterBuilder::new()
+        .quote_style(QuoteStyle::Always)
+        .has_headers(false)
+        .from_writer(Vec::new());
+
+    // Just manually write the headers so that they are pretty.
+    writer.write_record(["Start", "End", "Duration", "Tickets", "Description"])
+        .expect("Error writing time entry to timesheet");
+
+    for time in times {
+        writer.serialize(CsvTime::from(time))
+            .expect("Error writing time entry to timesheet");
+    }
+
+    writer.into_inner().ok()
+        .and_then(|inner| fs::write(&output, inner).ok())
+        .expect("Error writing CSV");
+
+    println!("Created timesheet: '{}'", output.display());
 }

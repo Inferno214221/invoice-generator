@@ -2,6 +2,7 @@ use chrono::{NaiveDate, NaiveDateTime};
 use derive_more::{Debug, Display};
 use diesel::prelude::*;
 use diesel::sqlite::Sqlite;
+use serde::{Serialize, Serializer};
 
 use super::schema;
 
@@ -14,7 +15,8 @@ pub struct Project {
     pub proj_name: String,
 }
 
-#[derive(Debug, Display, PartialEq, Eq, PartialOrd, Ord, HasQuery, Identifiable, Associations)]
+#[derive(Debug, HasQuery, Identifiable, Associations)]
+#[derive(Display, PartialEq, Eq, PartialOrd, Ord)]
 #[diesel(belongs_to(Project, foreign_key = proj_key))]
 #[diesel(table_name = schema::ticket)]
 #[diesel(primary_key(proj_key, tick_num))]
@@ -95,5 +97,13 @@ impl From<TicketTime> for Ticket {
             proj_key: value.proj_key,
             tick_num: value.tick_num
         }
+    }
+}
+
+impl Serialize for Ticket {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        serializer.serialize_str(&self.to_string())
     }
 }
