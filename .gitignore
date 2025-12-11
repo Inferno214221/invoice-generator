@@ -1,3 +1,6 @@
 /target
 .direnv
+.vscode
 main.sqlite
+*.csv
+*.pdf

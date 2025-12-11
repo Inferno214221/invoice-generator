@@ -98,16 +98,16 @@ impl ActivityWithTickets {
     ) -> QueryResult<Vec<ActivityWithTickets>> where
         Q: LoadQuery<'q, SqliteConnection, InvoiceActivity>
     {
-        let all_activites = query.load(conn)?;
+        let all_activities = query.load(conn)?;
 
         let times_with_tickets = TimeWithTickets::from_query(
-            Time::belonging_to(&all_activites),
+            Time::belonging_to(&all_activities),
             conn
         )?;
 
-        Ok(times_with_tickets.grouped_by(&all_activites)
+        Ok(times_with_tickets.grouped_by(&all_activities)
             .into_iter()
-            .zip(all_activites)
+            .zip(all_activities)
             .map(ActivityWithTickets::from)
             .collect())
     }
