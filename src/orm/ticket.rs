@@ -1,9 +1,18 @@
 use std::{str::FromStr, sync::LazyLock};
 
 use ctreg::regex;
+use derive_more::{Debug, Display};
 use serde::{Serialize, Serializer};
 
-use crate::orm::model::{Ticket, TicketTime};
+use crate::orm::model::TicketTime;
+
+#[derive(Debug, Display, PartialEq, Eq, PartialOrd, Ord)]
+#[debug("\"{proj_key}-{tick_num}\"")]
+#[display("{proj_key}-{tick_num}")]
+pub struct Ticket {
+    pub proj_key: String,
+    pub tick_num: i32,
+}
 
 // So diesel doesn't support composite foreign keys but luckily, the ticket table only has two
 // fields (at the moment), so we don't need to do any queries to turn a TicketTime into a Ticket.

@@ -4,17 +4,10 @@ CREATE TABLE project (
     proj_name       VARCHAR(25)                     NOT NULL
 );
 
-CREATE TABLE ticket (
-    proj_key        VARCHAR(10) REFERENCES project  NOT NULL,
-    tick_num        INTEGER                         NOT NULL,
-    PRIMARY KEY (proj_key, tick_num)
-);
-
 CREATE TABLE ticket_time (
     proj_key        VARCHAR(10) REFERENCES project  NOT NULL,
     tick_num        INTEGER                         NOT NULL,
     time_id         INTEGER REFERENCES time         NOT NULL,
-    FOREIGN KEY (proj_key, tick_num) REFERENCES ticket,
     PRIMARY KEY (proj_key, tick_num, time_id)
 );
 

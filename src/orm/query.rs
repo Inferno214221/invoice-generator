@@ -4,7 +4,7 @@ use chrono::{NaiveDate, NaiveDateTime};
 use diesel::prelude::*;
 use diesel::query_dsl::methods::LoadQuery;
 
-use crate::orm::model::{Invoice, InvoiceActivity, Recipient, Ticket, TicketTime, Time};
+use crate::orm::{model::{Invoice, InvoiceActivity, Recipient, TicketTime, Time}, ticket::Ticket};
 use super::schema;
 
 #[derive(Debug, Identifiable, Associations)]

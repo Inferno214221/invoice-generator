@@ -1,7 +1,9 @@
 use chrono::{NaiveDate, NaiveDateTime};
-use derive_more::{Debug, Display};
+use derive_more::Debug;
 use diesel::prelude::*;
 use diesel::sqlite::Sqlite;
+
+use crate::orm::ticket::Ticket;
 
 use super::schema;
 
@@ -12,19 +14,6 @@ use super::schema;
 pub struct Project {
     pub proj_key: String,
     pub proj_name: String,
-}
-
-#[derive(Debug, HasQuery, Identifiable, Associations)]
-#[derive(Display, PartialEq, Eq, PartialOrd, Ord)]
-#[diesel(belongs_to(Project, foreign_key = proj_key))]
-#[diesel(table_name = schema::ticket)]
-#[diesel(primary_key(proj_key, tick_num))]
-#[diesel(check_for_backend(Sqlite))]
-#[debug("\"{proj_key}-{tick_num}\"")]
-#[display("{proj_key}-{tick_num}")]
-pub struct Ticket {
-    pub proj_key: String,
-    pub tick_num: i32,
 }
 
 #[derive(Debug, HasQuery, Identifiable, Associations, Insertable)]

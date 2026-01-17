@@ -3,7 +3,7 @@ use std::{error::Error, iter, str::FromStr};
 use chrono::Local;
 use diesel::{insert_into, prelude::*};
 
-use crate::{cli::args::LogArgs, orm::{insert::LoggedTime, model::{Ticket, TicketTime}}};
+use crate::{cli::args::LogArgs, orm::{insert::LoggedTime, model::TicketTime, ticket::Ticket}};
 
 pub fn log(conn: &mut SqliteConnection, args: LogArgs) -> Result<(), Box<dyn Error>> {
     use crate::orm::schema::{ticket_time, time};
@@ -22,8 +22,6 @@ pub fn log(conn: &mut SqliteConnection, args: LogArgs) -> Result<(), Box<dyn Err
         .returning(time::time_id)
         .get_result(conn)
         .or(Err("Error inserting time into database"))?;
-
-    // TODO: Scratch that, remove the ticket table entirely.
 
     let tickets: Vec<TicketTime> = args.tickets.iter()
         .map(|s| Ticket::from_str(s).unwrap_or_else(|e| panic!("{e}")))

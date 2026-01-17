@@ -1,7 +1,7 @@
 use chrono::{Datelike, Local, NaiveDate, NaiveDateTime, Timelike};
 use typst::foundations::{Array, Datetime, Dict, IntoValue, Str, Value};
 
-use crate::orm::{model::{Recipient, Ticket}, query::{ActivityWithTickets, InvoiceWithActivities}};
+use crate::orm::{model::Recipient, query::{ActivityWithTickets, InvoiceWithActivities}, ticket::Ticket};
 
 // IntoValue exists, but the result is always a Value (enum) and the orphan rule prevents me from
 // implementing it for chrono types.

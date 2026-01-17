@@ -34,13 +34,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    ticket (proj_key, tick_num) {
-        proj_key -> Text,
-        tick_num -> Integer,
-    }
-}
-
-diesel::table! {
     ticket_time (proj_key, tick_num, time_id) {
         proj_key -> Text,
         tick_num -> Integer,
@@ -61,7 +54,6 @@ diesel::table! {
 
 diesel::joinable!(invoice -> recipient (recip_id));
 diesel::joinable!(invoice_activity -> invoice (inv_num));
-diesel::joinable!(ticket -> project (proj_key));
 diesel::joinable!(ticket_time -> project (proj_key));
 diesel::joinable!(ticket_time -> time (time_id));
 diesel::joinable!(time -> invoice_activity (act_num));
@@ -71,7 +63,6 @@ diesel::allow_tables_to_appear_in_same_query!(
     invoice_activity,
     project,
     recipient,
-    ticket,
     ticket_time,
     time,
 );
