@@ -2,7 +2,7 @@
   description = "Invoice Generator";
 
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.05";
+    nixpkgs.url = "nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
     
     fenix = {
@@ -32,29 +32,43 @@
           rustc = toolchain;
         };
         buildInputs = with pkgs; [
-          diesel-cli
+          openssl
+          sqlite
         ];
         nativeBuildInputs = with pkgs; [
           toolchain
           pkg-config
           gcc
+
           cargo-expand
           cargo-public-api
           rust-analyzer-nightly
-          openssl
-          sqlite
+          diesel-cli
+
+          makeWrapper
         ] ++ buildInputs;
+        LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath buildInputs;
       in with pkgs; rec
       {
         devShells.default = mkShell {
-          inherit nativeBuildInputs;
-
-          LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath [
-            pkgs.openssl
-            pkgs.sqlite
-          ];
+          inherit nativeBuildInputs LD_LIBRARY_PATH;
 
           DATABASE_URL = "/home/inferno214221/projects/owned/invoice-generator/main.sqlite";
+        };
+
+        packages.default = (naersk.buildPackage rec {          
+          src = ./.;
+
+          inherit buildInputs nativeBuildInputs;
+        }).overrideAttrs {
+          postFixup = ''
+            wrapProgram $out/bin/time-tracker --set LD_LIBRARY_PATH ${LD_LIBRARY_PATH}
+          '';
+        };
+
+        apps.default = {
+          type = "app";
+          program = "${packages.default}/bin/time-tracker";
         };
       }
     );
